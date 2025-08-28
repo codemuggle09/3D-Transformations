@@ -162,3 +162,79 @@ void drawCube() {
     }
     glEnd();
 }
+// ---------- GLUT Callbacks ----------
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
+    glTranslatef(0,0,-4);
+    glRotatef(viewRotX,1,0,0);
+    glRotatef(viewRotY,0,1,0);
+
+    drawAxes(1.5f);
+    drawCube();
+
+    glutSwapBuffers();
+}
+
+void reshape(int w,int h) {
+    win_w=w; win_h=h;
+    glViewport(0,0,w,h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(60.0,(double)w/h,0.1,100.0);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+// ---------- Input ----------
+void keyboard(unsigned char key,int x,int y) {
+    mat4 M;
+    switch(key) {
+        case 27: case 'q': exit(0); break;
+        case 'r': makeIdentity(modelMatrix);
+                  for (int i=0;i<8;i++) multiplyVec4(modelMatrix,baseCube[i],transformedCube[i]);
+                  printf("Model reset.\n"); break;
+        case '+': makeScale(1.1,1.1,1.1,M); applyTransform(M); printf("Scaled up.\n"); break;
+        case '-': makeScale(0.9,0.9,0.9,M); applyTransform(M); printf("Scaled down.\n"); break;
+        case 'x': makeRotationX(10,M); applyTransform(M); printf("Rotate X +10°\n"); break;
+        case 'X': makeRotationX(-10,M); applyTransform(M); printf("Rotate X -10°\n"); break;
+        case 'y': makeRotationY(10,M); applyTransform(M); printf("Rotate Y +10°\n"); break;
+        case 'Y': makeRotationY(-10,M); applyTransform(M); printf("Rotate Y -10°\n"); break;
+        case 'z': makeRotationZ(10,M); applyTransform(M); printf("Rotate Z +10°\n"); break;
+        case 'Z': makeRotationZ(-10,M); applyTransform(M); printf("Rotate Z -10°\n"); break;
+        case 'f': makeReflection('x',M); applyTransform(M); printf("Reflected about YZ.\n"); break;
+        case 'g': makeReflection('y',M); applyTransform(M); printf("Reflected about XZ.\n"); break;
+        case 'h': makeReflection('z',M); applyTransform(M); printf("Reflected about XY.\n"); break;
+        case '1': case '2': case '3': case '4': case '5': case '6':
+                  makeShear(key-'0',0.3,M); applyTransform(M);
+                  printf("Shear %d applied.\n",key-'0'); break;
+    }
+    glutPostRedisplay();
+}
+
+void special(int key,int x,int y) {
+    mat4 M;
+    switch(key) {
+        case GLUT_KEY_LEFT:  makeTranslation(-0.1,0,0,M); applyTransform(M); break;
+        case GLUT_KEY_RIGHT: makeTranslation(0.1,0,0,M); applyTransform(M); break;
+        case GLUT_KEY_UP:    makeTranslation(0,0.1,0,M); applyTransform(M); break;
+        case GLUT_KEY_DOWN:  makeTranslation(0,-0.1,0,M); applyTransform(M); break;
+        case GLUT_KEY_PAGE_UP:   makeTranslation(0,0,0.1,M); applyTransform(M); break;
+        case GLUT_KEY_PAGE_DOWN: makeTranslation(0,0,-0.1,M); applyTransform(M); break;
+    }
+    glutPostRedisplay();
+}
+
+void mouse(int button,int state,int x,int y) {
+    if(button==GLUT_LEFT_BUTTON) {
+        if(state==GLUT_DOWN) { dragging=1; lastX=x; lastY=y; }
+        else dragging=0;
+    }
+}
+
+void motion(int x,int y) {
+    if(!dragging) return;
+    int dx=x-lastX, dy=y-lastY;
+    viewRotY+=dx*0.5f; viewRotX+=dy*0.5f;
+    lastX=x; lastY=y;
+    glutPostRedisplay();
+}
