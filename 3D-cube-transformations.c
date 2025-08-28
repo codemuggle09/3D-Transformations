@@ -238,3 +238,22 @@ void motion(int x,int y) {
     lastX=x; lastY=y;
     glutPostRedisplay();
 }
+// ---------- Main ----------
+int main(int argc,char** argv) {
+    printf("Custom 3D Transformation Demo\n");
+    initCube();
+    glutInit(&argc,argv);
+    glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH);
+    glutInitWindowSize(win_w,win_h);
+    glutCreateWindow("3D Transformations (Custom)");
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.95f,0.95f,0.97f,1);
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutKeyboardFunc(keyboard);
+    glutSpecialFunc(special);
+    glutMouseFunc(mouse);
+    glutMotionFunc(motion);
+    glutMainLoop();
+    return 0;
+}
