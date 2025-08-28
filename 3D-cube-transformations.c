@@ -103,3 +103,62 @@ void applyTransform(const mat4 M) {
     for (int i = 0; i < 8; i++)
         multiplyVec4(modelMatrix, baseCube[i], transformedCube[i]);
 }
+// ---------- Cube Setup ----------
+void initCube() {
+    float s = 0.6f; // half-size
+    vec4 verts[8] = {
+        {-s,-s,-s,1}, { s,-s,-s,1}, { s, s,-s,1}, {-s, s,-s,1},
+        {-s,-s, s,1}, { s,-s, s,1}, { s, s, s,1}, {-s, s, s,1}
+    };
+    for (int i = 0; i < 8; i++) memcpy(baseCube[i], verts[i], sizeof(vec4));
+    makeIdentity(modelMatrix);
+    for (int i = 0; i < 8; i++) multiplyVec4(modelMatrix, baseCube[i], transformedCube[i]);
+}
+
+// ---------- Drawing ----------
+void drawAxes(float len) {
+    glBegin(GL_LINES);
+      glColor3f(1,0,0); glVertex3f(0,0,0); glVertex3f(len,0,0);
+      glColor3f(0,1,0); glVertex3f(0,0,0); glVertex3f(0,len,0);
+      glColor3f(0,0,1); glVertex3f(0,0,0); glVertex3f(0,0,len);
+    glEnd();
+}
+
+void drawCube() {
+    int faces[6][4] = {
+        {0,1,2,3}, {4,5,6,7}, // back & front
+        {0,4,7,3}, {1,5,6,2}, // left & right
+        {3,2,6,7}, {0,1,5,4}  // top & bottom
+    };
+
+    float colors[6][3] = {
+        {0.9f,0.4f,0.4f}, {0.4f,0.9f,0.4f}, {0.4f,0.4f,0.9f},
+        {0.9f,0.9f,0.4f}, {0.9f,0.6f,0.9f}, {0.4f,0.9f,0.9f}
+    };
+
+    for (int f = 0; f < 6; f++) {
+        glColor3fv(colors[f]);
+        glBegin(GL_QUADS);
+        for (int v = 0; v < 4; v++) {
+            int idx = faces[f][v];
+            glVertex3f(transformedCube[idx][0],
+                       transformedCube[idx][1],
+                       transformedCube[idx][2]);
+        }
+        glEnd();
+    }
+
+    glColor3f(0,0,0);
+    glBegin(GL_LINES);
+    int edges[12][2] = {
+        {0,1},{1,2},{2,3},{3,0},
+        {4,5},{5,6},{6,7},{7,4},
+        {0,4},{1,5},{2,6},{3,7}
+    };
+    for (int i=0;i<12;i++) {
+        int a=edges[i][0], b=edges[i][1];
+        glVertex3f(transformedCube[a][0],transformedCube[a][1],transformedCube[a][2]);
+        glVertex3f(transformedCube[b][0],transformedCube[b][1],transformedCube[b][2]);
+    }
+    glEnd();
+}
