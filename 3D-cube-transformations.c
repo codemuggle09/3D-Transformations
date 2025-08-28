@@ -47,3 +47,59 @@ void multiplyVec4(const mat4 m, const vec4 v, vec4 out) {
     for (int r = 0; r < 4; r++)
         out[r] = m[r][0]*v[0] + m[r][1]*v[1] + m[r][2]*v[2] + m[r][3]*v[3];
 }
+// ---------- Transformation Generators ----------
+void makeTranslation(float tx, float ty, float tz, mat4 out) {
+    makeIdentity(out);
+    out[0][3] = tx; out[1][3] = ty; out[2][3] = tz;
+}
+
+void makeScale(float sx, float sy, float sz, mat4 out) {
+    makeIdentity(out);
+    out[0][0] = sx; out[1][1] = sy; out[2][2] = sz;
+}
+
+void makeRotationX(float deg, mat4 out) {
+    makeIdentity(out);
+    float a = deg * DEG2RAD;
+    out[1][1] = cosf(a); out[1][2] = -sinf(a);
+    out[2][1] = sinf(a); out[2][2] = cosf(a);
+}
+
+void makeRotationY(float deg, mat4 out) {
+    makeIdentity(out);
+    float a = deg * DEG2RAD;
+    out[0][0] = cosf(a); out[0][2] = sinf(a);
+    out[2][0] = -sinf(a); out[2][2] = cosf(a);
+}
+
+void makeRotationZ(float deg, mat4 out) {
+    makeIdentity(out);
+    float a = deg * DEG2RAD;
+    out[0][0] = cosf(a); out[0][1] = -sinf(a);
+    out[1][0] = sinf(a); out[1][1] = cosf(a);
+}
+
+void makeReflection(char axis, mat4 out) {
+    makeIdentity(out);
+    if (axis == 'x') out[0][0] = -1;
+    if (axis == 'y') out[1][1] = -1;
+    if (axis == 'z') out[2][2] = -1;
+}
+
+void makeShear(int type, float sh, mat4 out) {
+    makeIdentity(out);
+    switch (type) {
+        case 1: out[0][1] = sh; break; // X += sh*Y
+        case 2: out[0][2] = sh; break; // X += sh*Z
+        case 3: out[1][0] = sh; break; // Y += sh*X
+        case 4: out[1][2] = sh; break; // Y += sh*Z
+        case 5: out[2][0] = sh; break; // Z += sh*X
+        case 6: out[2][1] = sh; break; // Z += sh*Y
+    }
+}
+
+void applyTransform(const mat4 M) {
+    multiplyMat4(M, modelMatrix, modelMatrix);
+    for (int i = 0; i < 8; i++)
+        multiplyVec4(modelMatrix, baseCube[i], transformedCube[i]);
+}
